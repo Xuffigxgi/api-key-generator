@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 420px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        h2 { margin-bottom: 25px; color: var(--accent-color); }
+        .options {
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .options label { display: block; margin-bottom: 8px; color: #94a3b8; }
+        .options select, .options input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+        button.gen-btn {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        button.gen-btn:hover { background-color: var(--accent-hover); }
+        .result-box {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .result {
+            flex-grow: 1;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            color: #38bdf8;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .copy-btn {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+            transition: 0.2s;
+        }
+        .copy-btn:hover { background: #475569; }
+        .toast {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #4ade80;
+            height: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>🔑 API Key Generator</h2>
+        
+        <div class="options">
+            <label>Prefix (คำนำหน้า):</label>
+            <input type="text" id="prefixInput" value="sk_live_">
+            
+            <label>ความยาว (Bytes):</label>
+            <select id="lengthSelect">
+                <option value="16">มาตรฐาน (32 ตัวอักษร)</option>
+                <option value="24">ปลอดภัยสูง (48 ตัวอักษร)</option>
+                <option value="32">ปลอดภัยสูงสุด (64 ตัวอักษร)</option>
+            </select>
+        </div>
+
+        <button class="gen-btn" onclick="generateApiKey()">สร้าง API Key</button>
+
+        <div class="result-box">
+            <div class="result" id="keyResult">คลิกปุ่มด้านบน...</div>
+            <button class="copy-btn" onclick="copyKey()">คัดลอก</button>
+        </div>
+        <div class="toast" id="toastMsg"></div>
+    </div>
+
+    <script>
+        function generateApiKey() {
+            const prefix = document.getElementById('prefixInput').value.trim();
+            const length = parseInt(document.getElementById('lengthSelect').value);
+            
+            // ใช้ Web Crypto API ในการสุ่มค่าแบบปลอดภัย (Cryptographically strong)
+            const array = new Uint8Array(length);
+            window.crypto.getRandomValues(array);
+            
+            // แปลงเป็น Hex string
+            const randomHex = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+            const apiKey = prefix ? `${prefix}${randomHex}` : randomHex;
+
+            document.getElementById('keyResult').innerText = apiKey;
+            document.getElementById('toastMsg').innerText = '';
+        }
+
+        function copyKey() {
+            const keyText = document.getElementById('keyResult').innerText;
+            if (keyText && keyText !== 'คลิกปุ่มด้านบน...') {
+                navigator.clipboard.writeText(keyText);
+                document.getElementById('toastMsg').innerText = 'คัดลอกไปยังคลิปบอร์ดแล้ว!';
+                setTimeout(() => {
+                    document.getElementById('toastMsg').innerText = '';
+                }, 2000);
+            }
+        }
+    </script>
+
+</body>
+</html>
